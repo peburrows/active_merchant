@@ -61,6 +61,9 @@ first_pay:
   login:
   password:
 
+global_collect:
+  login: X
+
 ideal_ing_postbank:
   login: LOGIN
   password: PASSWORD
