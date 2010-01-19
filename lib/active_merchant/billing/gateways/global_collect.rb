@@ -115,6 +115,10 @@ module ActiveMerchant #:nodoc:
         # raise ArgumentError, "A CVV2 value is required for credit card purchases" if (!post[:cvv] || post[:cvv] == '')
       end
       
+      def test?
+        @options[:test] || Base.gateway_mode == :test
+      end
+      
       def parse(xml)
         results = {}
         xml = REXML::Document.new(xml)
@@ -144,15 +148,14 @@ module ActiveMerchant #:nodoc:
       def commit(action, money, post)
         request_xml = build_request(action, post, money)
         
-        # puts post.inspect
-        
         # if action == 'capture'
         #   puts request_xml 
         # else
         #   puts post[:order_id]
         # end
         
-        response = parse( ssl_post(test? ? TEST_URL : LIVE_URL, request_xml) )
+        url = (test? ? TEST_URL : LIVE_URL)
+        response = parse( ssl_post(url, request_xml) )
         
         Response.new(response[:result] == APPROVED, response[:message], response,
           :test => test?,
