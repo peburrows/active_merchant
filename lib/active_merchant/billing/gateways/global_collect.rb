@@ -111,7 +111,8 @@ module ActiveMerchant #:nodoc:
         post[:exp_date]           = expdate(creditcard)
         post[:first_name]         = creditcard.first_name
         post[:last_name]          = creditcard.last_name
-        raise ArgumentError, "A CVV2 value is required for credit card purchases" if (!post[:cvv] || post[:cvv] == '')
+        # we don't want to require a CVV2 value here...
+        # raise ArgumentError, "A CVV2 value is required for credit card purchases" if (!post[:cvv] || post[:cvv] == '')
       end
       
       def parse(xml)
