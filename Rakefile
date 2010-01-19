@@ -21,7 +21,26 @@ task :default => 'test:units'
 
 # Run the unit tests
 namespace :test do
+  namespace :only do 
+    desc 'run only a single remote test'
+    Rake::TestTask.new(:remote) do |t|
+      v = ENV['p'] ? ENV['p'] : '*'
+      t.pattern = "test/remote/**/remote_#{v}_test.rb"
+      t.ruby_opts << '-rubygems'
+      t.libs << 'test'
+      t.verbose = true
+    end
 
+    desc 'run only a single unit test'
+    Rake::TestTask.new(:units) do |t|
+      v = ENV['p'] ? ENV['p'] : '*'
+      t.pattern = "test/unit/**/#{v}_test.rb"
+      t.ruby_opts << '-rubygems'
+      t.libs << 'test'
+      t.verbose = true
+    end
+  end
+  
   Rake::TestTask.new(:units) do |t|
     t.pattern = 'test/unit/**/*_test.rb'
     t.ruby_opts << '-rubygems'
