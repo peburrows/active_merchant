@@ -159,7 +159,7 @@ module ActiveMerchant #:nodoc:
         
         Response.new(response[:result] == APPROVED, response[:message], response,
           :test => test?,
-          :authorization => response[:externalreference],
+          :authorization => response[:externalreference] || response[:requestid],
           :avs_result => { :code => response[:avsresult] },
           :cvv_result => response[:cvvresult])
       end
