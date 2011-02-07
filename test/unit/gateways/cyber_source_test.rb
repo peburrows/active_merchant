@@ -14,8 +14,8 @@ class CyberSourceTest < Test::Unit::TestCase
     @declined_card = credit_card('801111111111111', :type => 'visa')
 
     @options = { :billing_address => {
-      :first_name => 'Jim',
-      :last_name => 'Smith',
+                  :first_name => 'Jim',
+                  :last_name => 'Smith',
                   :address1 => '1234 My Street',
                   :address2 => 'Apt 1',
                   :company => 'Widgets Inc',
@@ -191,6 +191,43 @@ class CyberSourceTest < Test::Unit::TestCase
     assert response.test?
   end
 
+  def test_successful_create_subscription_request
+    @gateway.stubs(:ssl_post).returns(successful_create_subscription_response)
+    assert response = @gateway.create_subscription(@credit_card, @subscription_options)
+    assert response.success?
+    assert response.test?
+  end
+
+  def test_successful_update_subscription_request
+    @gateway.stubs(:ssl_post).returns(successful_create_subscription_response, successful_update_subscription_response)
+    assert response = @gateway.create_subscription(@credit_card, @subscription_options)
+    assert response.success?
+    assert response.test?
+    assert response = @gateway.update_subscription(response.authorization, @subscription_options.merge(:credit_card => @credit_card))
+    assert response.success?
+    assert response.test?
+  end
+
+  def test_successful_subscription_purchase_request
+    @gateway.stubs(:ssl_post).returns(successful_create_subscription_response, successful_subscription_purchase_response)
+    assert response = @gateway.create_subscription(@credit_card, @subscription_options)
+    assert response.success?
+    assert response.test?
+    assert response = @gateway.subscription_purchase(@amount, response.authorization, @options)
+    assert response.success?
+    assert response.test?
+  end
+
+ def test_successful_retrieve_subscription_request
+    @gateway.stubs(:ssl_post).returns(successful_create_subscription_response, successful_retrieve_subscription_response)
+    assert response = @gateway.create_subscription(@credit_card, @subscription_options)
+    assert response.success?
+    assert response.test?
+    assert response = @gateway.retrieve_subscription(response.authorization)
+    assert response.success?
+    assert response.test?
+  end
+
   private
 
   def successful_purchase_response
@@ -237,6 +274,14 @@ class CyberSourceTest < Test::Unit::TestCase
 <?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
 <soap:Header>
 <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"><wsu:Timestamp xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="Timestamp-5589339"><wsu:Created>2008-01-21T16:00:38.927Z</wsu:Created></wsu:Timestamp></wsse:Security></soap:Header><soap:Body><c:replyMessage xmlns:c="urn:schemas-cybersource-com:transaction-data-1.32"><c:merchantReferenceCode>TEST11111111111</c:merchantReferenceCode><c:requestID>2009312387810008401927</c:requestID><c:decision>ACCEPT</c:decision><c:reasonCode>100</c:reasonCode><c:requestToken>Af/vj7OzPmut/eogHFCrBiwYsWTJy1r127CpCn0KdOgyTZnzKwVYCmzPmVgr9ID5H1WGTSTKuj0i30IE4+zsz2d/QNzwBwAACCPA</c:requestToken><c:purchaseTotals><c:currency>USD</c:currency></c:purchaseTotals><c:ccCreditReply><c:reasonCode>100</c:reasonCode><c:requestDateTime>2008-01-21T16:00:38Z</c:requestDateTime><c:amount>1.00</c:amount><c:reconciliationID>010112295WW70TBOPSSP2</c:reconciliationID></c:ccCreditReply></c:replyMessage></soap:Body></soap:Envelope>
+    XML
+  end
+
+  def successful_create_subscription_response
+    <<-XML
+    <?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Header>
+    <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"><wsu:Timestamp xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="Timestamp-8747786"><wsu:Created>2008-10-14T20:36:38.467Z</wsu:Created></wsu:Timestamp></wsse:Security></soap:Header><soap:Body><c:replyMessage xmlns:c="urn:schemas-cybersource-com:transaction-data-1.32"><c:merchantReferenceCode>949c7098db10a846595ade653f7d259e</c:merchantReferenceCode><c:requestID>2240165983980008402433</c:requestID><c:decision>ACCEPT</c:decision><c:reasonCode>100</c:reasonCode><c:requestToken>AhjzbwSP5cIxVhZHObgEUAU2LoPM+TpAfJAwQyXRR8hAdjiAmAAA6QCH</c:requestToken><c:paySubscriptionCreateReply><c:reasonCode>100</c:reasonCode><c:subscriptionID>2240165983980008402433</c:subscriptionID></c:paySubscriptionCreateReply></c:replyMessage></soap:Body></soap:Envelope>
     XML
   end
 

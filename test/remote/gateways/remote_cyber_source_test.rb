@@ -200,4 +200,47 @@ class RemoteCyberSourceTest < Test::Unit::TestCase
     assert response.test?
 >>>>>>> 8890f19... added profile management to CyberSource gateway
   end
+
+  def test_successful_create_subscription
+    assert response = @gateway.create_subscription(@credit_card, @subscription_options)
+    assert_equal 'Successful transaction', response.message
+    assert_success response
+    assert response.test?
+  end
+
+  def test_successful_update_subscription
+    assert response = @gateway.create_subscription(@credit_card, @subscription_options)
+    assert_equal 'Successful transaction', response.message
+    assert_success response
+    assert response.test?
+
+    assert response = @gateway.update_subscription(response.authorization, @subscription_options.merge(:subscription => {:amount => 500}))
+    assert_equal 'Successful transaction', response.message
+    assert_success response
+    assert response.test?
+  end
+
+  def test_successful_subscription_purchase
+    assert response = @gateway.create_subscription(@credit_card, @subscription_options)
+    assert_equal 'Successful transaction', response.message
+    assert_success response
+    assert response.test?
+
+    assert response = @gateway.subscription_purchase(@amount, response.authorization, @options)
+    assert_equal 'Successful transaction', response.message
+    assert_success response
+    assert response.test?
+  end
+
+  def test_successful_subscription_retrieval
+    assert response = @gateway.create_subscription(@credit_card, @subscription_options)
+    assert_equal 'Successful transaction', response.message
+    assert_success response
+    assert response.test?
+
+    assert response = @gateway.retrieve_subscription(response.authorization, @options)
+    assert_equal 'Successful transaction', response.message
+    assert_success response
+    assert response.test?
+  end
 end

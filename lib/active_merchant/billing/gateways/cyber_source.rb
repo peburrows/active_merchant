@@ -323,6 +323,70 @@ module ActiveMerchant #:nodoc:
         xml.target!
       end
 
+      def build_create_subscription_request(creditcard, options)
+        xml = Builder::XmlMarkup.new :indent => 2
+        add_address(xml, options[:billing_address], options)
+        add_address(xml, options[:shipping_address], options, true)
+        add_purchase_data(xml, options[:subscription][:amount], options[:setup_fee], options)
+        add_creditcard(xml, creditcard)
+        add_subscription(xml, options)
+        add_subscription_create_service(xml, options)
+        add_business_rules_data(xml)
+        xml.target!
+      end
+
+      def build_update_subscription_request(identification, options)
+        reference_code, subscription_id, request_token = identification.split(";")
+        options[:subscription] ||= {}
+        options[:subscription][:subscription_id] = subscription_id
+
+        xml = Builder::XmlMarkup.new :indent => 2
+        add_address(xml, options[:billing_address], options) unless options[:billing_address].empty?
+        add_address(xml, options[:shipping_address], options, true) unless options[:shipping_address].empty?
+        add_purchase_data(xml, options[:subscription][:amount], options[:setup_fee], options)
+        add_creditcard(xml, options[:credit_card]) if options[:credit_card]
+        add_subscription(xml, options)
+        add_subscription_update_service(xml, options)
+        add_business_rules_data(xml)
+        xml.target!
+      end
+
+      def build_retrieve_subscription_request(identification, options)
+        reference_code, subscription_id, request_token = identification.split(";")
+        options[:subscription] ||= {}
+        options[:subscription][:subscription_id] = subscription_id
+        xml = Builder::XmlMarkup.new :indent => 2
+        add_subscription(xml, options)
+        add_subscription_retrieve_service(xml, options)
+        xml.target!
+      end
+
+      def build_subscription_authorization_request(money, identification, options)
+        reference_code, subscription_id, request_token = identification.split(";")
+        options[:subscription] ||= {}
+        options[:subscription][:subscription_id] = subscription_id
+
+        xml = Builder::XmlMarkup.new :indent => 2
+        add_purchase_data(xml, money, true, options)
+        add_subscription(xml, options)
+        add_auth_service(xml)
+        add_business_rules_data(xml)
+        xml.target!
+      end
+
+      def build_subscription_purchase_request(money, identification, options)
+        reference_code, subscription_id, request_token = identification.split(";")
+        options[:subscription] ||= {}
+        options[:subscription][:subscription_id] = subscription_id
+
+        xml = Builder::XmlMarkup.new :indent => 2
+        add_purchase_data(xml, money, true, options)
+        add_subscription(xml, options)
+        add_purchase_service(xml, options)
+        add_business_rules_data(xml)
+        xml.target!
+      end
+
       def add_business_rules_data(xml)
         xml.tag! 'businessRules' do
           xml.tag!('ignoreAVSResult', 'true') if @options[:ignore_avs]
@@ -424,12 +488,12 @@ module ActiveMerchant #:nodoc:
       end
 
       def add_subscription_update_service(xml, options)
-  add_auth_service(xml) if options[:setup_fee]
-  xml.tag! 'paySubscriptionUpdateService', {'run' => 'true'}
+        add_auth_service(xml) if options[:setup_fee]
+        xml.tag! 'paySubscriptionUpdateService', {'run' => 'true'}
       end
 
       def add_subscription_retrieve_service(xml, options)
-  xml.tag! 'paySubscriptionRetrieveService', {'run' => 'true'}
+        xml.tag! 'paySubscriptionRetrieveService', {'run' => 'true'}
       end
 
       def add_subscription(xml, options)
@@ -447,7 +511,6 @@ module ActiveMerchant #:nodoc:
           xml.tag! 'billPayment',       options[:subscription][:bill_payment] if options[:subscription][:bill_payment]
         end
       end
-
 
       # Where we actually build the full SOAP request using builder
       def build_request(body, options)
