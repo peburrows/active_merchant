@@ -25,7 +25,7 @@ module ActiveMerchant #:nodoc:
         requires!(options, :login)
         @options = options
         super
-      end  
+      end
       
       def authorize(money, creditcard, options = {})
         post = {}
@@ -40,6 +40,7 @@ module ActiveMerchant #:nodoc:
       
       def purchase(money, creditcard, options = {})
         post = {}
+        
         add_merchant_details(post, options)
         add_invoice(post, options)
         add_creditcard(post, creditcard)        
@@ -238,15 +239,15 @@ module ActiveMerchant #:nodoc:
       
       def payment_product_id(cardtype)
         case cardtype.to_s
-          when 'visa'             then '1'
-          when 'american_express' then '2'
-          when 'master'           then '3'
-          when 'jcb'              then '125'
-          when 'discover'         then '128'
-          when 'laser'            then '124'
-          when 'solo'             then '118'
-          when 'maestro'          then '117'
-          when 'dankort'          then '123'
+          when 'visa'                         then '1'
+          when /^(american_express|amex)$/    then '2'
+          when /^(master|master_card)$/       then '3'
+          when 'jcb'                          then '125'
+          when 'discover'                     then '128'
+          when 'laser'                        then '124'
+          when 'solo'                         then '118'
+          when 'maestro'                      then '117'
+          when 'dankort'                      then '123'
         end
       end
       

@@ -62,7 +62,7 @@ first_pay:
   password:
 
 global_collect:
-  login: X
+  login: '5165'
 
 ideal_ing_postbank:
   login: LOGIN
